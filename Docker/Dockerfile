@@ -30,12 +30,11 @@ RUN git clone --branch master https://github.com/repleo/bounca.git $BOUNCA_SRVPR
 COPY requirements.txt $BOUNCA_SRVPROJ/requirements.txt
 
 # Install Python dependencies
-RUN pip3 install -r $BOUNCA_SRVPROJ/requirements.txt
-RUN pip3 install gunicorn==19.3.0
+RUN cd $BOUNCA_SRVPROJ &&  python3 -m venv venv/ && source venv/bin/activate &&  pip3 install -r $BOUNCA_SRVPROJ/requirements.txt
 
 RUN mkdir -p  $BOUNCA_SRVHOME/media $BOUNCA_SRVHOME/static /srv/www/bounca/bounca/static $BOUNCA_SRVHOME/logs
 
-RUN python3 /srv/www/bounca/manage.py collectstatic --noinput
+RUN cd $BOUNCA_SRVPROJ &&  python3 -m venv venv/ && source venv/bin/activate && python3 /srv/www/bounca/manage.py collectstatic --noinput
 
 FROM alpine:3  
 ENV BOUNCA_SRC=bounca \
@@ -53,6 +52,7 @@ RUN apk --no-cache add \
   postgresql-dev \
   libpq \
   python3 \
+  py3-pip \
   py3-virtualenv \
   gettext \
   uwsgi-python3 \
