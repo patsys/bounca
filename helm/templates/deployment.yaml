@@ -1,0 +1,111 @@
+{{- if not .Values.bounca.admin.password }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.bounca.admin.secret.password.ref.name | default ( printf "%s-admin-pass" ( include "bounca.fullname" . ) ) }}
+  namespace: {{ .Release.Namespace }}
+type: kubernetes.io/opaque
+data:
+  {{- $cert_pass := lookup "v1" "Secret" .Release.Namespace ( .Values.bounca.admin.secret.password.ref.name | default ( printf "%s-admin-pass" ( include "bounca.fullname" . ) )) }}
+  {{- if $cert_pass  }} 
+  {{ .Values.bounca.admin.secret.password.ref.key | default "pass" }}: {{ index $cert_pass.data (.Values.bounca.admin.secret.password.ref.key | default "pass") }} 
+  {{- else}}
+  {{ .Values.bounca.admin.secret.password.ref.key | default "pass" }}: {{ .Values.bounca.admin.secret.password.password | default ( randAscii 16 ) | replace "'" "''" | b64enc | quote  }}
+  {{- end }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "bounca.fullname" . }}
+  labels:
+    {{- include "bounca.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "bounca.fullname" . }}
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "bounca.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "bounca.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "bounca.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        env:
+        - name: ADMIN_INITIAL_PASSWORD
+        {{- if .Values.bounca.admin.password  }}
+          value: {{ .Values.bounca.admin.password }}
+        {{- else }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.bounca.admin.secret.password.ref.name | default ( printf "%s-admin-pass" ( include "bounca.fullname" . ) ) }}
+              key: {{ .Values.bounca.admin.secret.password.ref.key | default "pass" }}
+        {{- end }}
+ {{- if .Values.bounca.envs }}
+          {{- toYaml .Values.bounca.envs | nindent 10 }}
+        {{- end }}
+        - name: DB_USER 
+          value: {{ .Values.database.user }}
+        - name: DB_PWD 
+          value: {{ .Values.database.password }}
+        - name: DB_HOST 
+          value: {{ .Values.database.hostname }}
+        - name: DB_NAME 
+          value: {{ .Values.database.database }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ include "bounca.fullname" . }}-data
+          mountPath: /var/www/bounca/store
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+#        livenessProbe:
+#          httpGet:
+#            path: /
+#            port: http
+#        readinessProbe:
+#          httpGet:
+#            path: /
+#            port: http
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "bounca.fullname" . }}-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.bounca.storage.size | default "10Gi" }}

@@ -1,0 +1,38 @@
+{{- if .Values.ingress.letsencrypt.enabled }}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ include "bounca.fullname" . }}-letsencrypt
+spec:
+  acme:
+    # The ACME server URL
+    server: {{ .Values.ingress.letsencrypt.server | default "https://acme-v02.api.letsencrypt.org/directory" }}
+    # Email address used for ACME registration
+    email: {{ .Values.ingress.letsencrypt.email }}
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: {{ include "bounca.fullname" . }}-letsencrypt-key
+    # Enable the HTTP-01 challenge provider
+    solvers:
+    # An empty 'selector' means that this solver matches all domains
+    {{- if .Values.ingress.letsencrypt.dns01 }}
+    - dns01:
+        {{- toYaml .Values.ingress.letsencrypt.dns01 | nindent 8 }}
+    {{- else }}
+    - http01:
+        ingress:
+          class: nginx
+    {{- end }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "bounca.fullname" . }}-letsencrypt-crt
+spec:
+  secretName: {{ include "bounca.fullname" . }}-letsencrypt-crt
+  commonName: {{ first .Values.ingress.letsencrypt.hosts }}
+  dnsNames:
+    {{ .Values.ingress.letsencrypt.hosts }}
+  issuerRef:
+    name: {{ include "bounca.fullname" . }}-letsencrypt
+{{- end }}

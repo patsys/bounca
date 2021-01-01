@@ -36,7 +36,8 @@ RUN mkdir -p  $BOUNCA_SRVHOME/media $BOUNCA_SRVHOME/static /srv/www/bounca/bounc
 
 RUN cd $BOUNCA_SRVPROJ \
   &&  python3 -m venv venv/ && source venv/bin/activate \
-  && find ./webapp/templates/bounca  -name "**.html"  -type f -exec sh -c 'sed -i "s/load staticfiles/load static/g" "$0"' {} \; &&  python3 /srv/www/bounca/manage.py collectstatic --noinput
+  && find ./webapp/templates/bounca  -name "**.html"  -type f -exec sh -c 'sed -i "s/load staticfiles/load static/g" "$0"; sed -i "s/{%bounca_version%}/master/g" $0' {} \; \
+  && python3 /srv/www/bounca/manage.py collectstatic --noinput
 
 FROM alpine:3  
 ENV BOUNCA_SRC=bounca \
@@ -65,6 +66,7 @@ COPY --from=0 /srv/www/bounca/ /var/www/bounca
 RUN mkdir -p /etc/bounca && rm /etc/nginx/conf.d/default.conf
 COPY entrypoint.sh /opt/entrypoint
 COPY conf/bounca.ini /var/templates/bounca/main.ini
+COPY conf/bounca.yaml /var/templates/bounca/bounca.yaml
 COPY conf/vhost.conf /etc/nginx/conf.d/bounca.conf
 COPY conf/uwsgi.ini /etc/uwsgi/conf.d/bounca.ini
 COPY conf/supervisord.ini /etc/supervisor.d/supervisord.ini
