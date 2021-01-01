@@ -34,7 +34,9 @@ RUN cd $BOUNCA_SRVPROJ &&  python3 -m venv venv/ && source venv/bin/activate && 
 
 RUN mkdir -p  $BOUNCA_SRVHOME/media $BOUNCA_SRVHOME/static /srv/www/bounca/bounca/static $BOUNCA_SRVHOME/logs
 
-RUN cd $BOUNCA_SRVPROJ &&  python3 -m venv venv/ && source venv/bin/activate && python3 /srv/www/bounca/manage.py collectstatic --noinput
+RUN cd $BOUNCA_SRVPROJ \
+  &&  python3 -m venv venv/ && source venv/bin/activate \
+  && find ./webapp/templates/bounca  -name "**.html"  -type f -exec sh -c 'sed -i "s/load staticfiles/load static/g" "$0"' {} \; &&  python3 /srv/www/bounca/manage.py collectstatic --noinput
 
 FROM alpine:3  
 ENV BOUNCA_SRC=bounca \
