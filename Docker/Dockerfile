@@ -52,8 +52,6 @@ ENV BOUNCA_SRC=bounca \
 RUN apk --no-cache add \
   nginx \
   uwsgi \
-  postgresql-dev \
-  libpq \
   python3 \
   py3-pip \
   py3-virtualenv \
@@ -74,6 +72,7 @@ COPY conf/supervisord.ini /etc/supervisor.d/supervisord.ini
 RUN adduser -S www-data -G www-data \
   && chown -R www-data:www-data /var/www/bounca \
   && chown -R nginx:nginx /var/www/bounca/media \
+  && cd /var/www/bounca && python3 -m venv venv/ \
   && touch /var/www/bounca/init-setup
 
 ENTRYPOINT ["/opt/entrypoint"]
