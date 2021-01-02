@@ -1,33 +1,29 @@
-## REFECTORING is in Progress README outdated
+## Not Working
+* folder media/static/libs not existing so angular, bootstrap und co not working
+
+## Require
+* Postgresql Database >12
 
 ## BounCA Dockerfile
 
-
-This repository contains **Dockerfile** of [BounCA](https://bounca.org/) for [Docker](https://www.docker.com/)'s [automated build](https://registry.hub.docker.com/u/repleo/bounca/) published to the public [Docker Hub Registry](https://registry.hub.docker.com/).
+This repository contains **Dockerfile** of [BounCA](https://bounca.org/) for [Docker](https://www.docker.com/)'s (https://registry.hub.docker.com/u/patsys/bounca/) published to the public [Docker Hub Registry](https://registry.hub.docker.com/).
 
 
 ### Base Docker Image
 
-* debian:8.4
+* alpine:3
 
+### Environment Variable
+| Name       | required | Description       | Default            |
+|------------|----------|-------------------|--------------------|
+| DB_USER    | *        | Database User     | postgresql         |
+| DB_PWD     | *        | Database Password | postgresql         |
+| DB_HOST    | *        | Database Host     | postgresql         |
+| DB_NAME    | *        | Database Name     | postgresql         |
+| SMTP_HOST  | -        | Smtp Host         | localhost          |
+| ADMIN_MAIL | -        | Admin Email       | admin@localhost    |
+| FROM_MAIL  | -        | Email send from   | no-reply@localhost |
 
-### Installation
+## Todo
+* Set Admin Password
 
-1. Install [Docker](https://www.docker.com/).
-
-2. Download [automated build](https://registry.hub.docker.com/u/repleo/bounca/) from public [Docker Hub Registry](https://registry.hub.docker.com/): `docker pull dockerfile/nginx`
-
-   (alternatively, you can build an image from Dockerfile: `docker build -t="repleo/bounca" github.com/repleo/bounca`)
-
-
-### Usage
-
-see [Bounca - get-started](https://www.bounca.org/getting-started.html)
-   
-You need to launch BounCA via docker-composer
-
-### Author Information
-
-Jeroen Arnoldus (jeroen@repleo.nl)
-
-Repleo, Amstelveen, Holland -- www.repleo.nl  
