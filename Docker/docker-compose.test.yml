@@ -1,0 +1,31 @@
+version: '2'
+services:
+  bounca:
+    build: .
+    image: patsys/bounca
+    environment:
+    - DB_USER=bounca
+    - DB_PWD=Secret!!
+    - DB_NAME=bouncadb
+    - DB_HOST=postgresql-test
+    links:
+      - postgresql-test
+    expose:
+      - "80"
+  postgresql-test:
+    image: postgres:13
+    environment:
+    - POSTGRES_PASSWORD=Secret!!
+    - POSTGRES_USER=bounca
+    - POSTGRES_DB=bouncadb
+    expose:
+      - "3306"
+  sut:
+    image: patsys/test-webserver
+    links:
+    - bounca
+    environment:
+      - HOST=http://bounca
+      - WORD=logged
+      - INTERVAL=10
+      - TRY=70
