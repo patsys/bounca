@@ -1,0 +1,17 @@
+psql:
+  dbname: $DB_NAME
+  username: $DB_USER
+  password: $DB_PWD
+  host: $DB_HOST
+  port: 5432
+
+django:
+  debug: True
+  secret_key: '$$SECRET_KEY'
+  hosts:
+  - '*'
+
+mail:
+  host: $SMTP_HOST
+  admin: $ADMIN_MAIL
+  from: $FROM_MAIL
