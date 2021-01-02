@@ -26,6 +26,6 @@ services:
     - bounca
     environment:
       - HOST=http://bounca/admin/login
-      - WORD=logged
+      - WORD=Password
       - INTERVAL=10
       - TRY=70
