@@ -51,6 +51,7 @@ ENV BOUNCA_SRC=bounca \
     FROM_MAIL=no-reply@localhost
 RUN apk --no-cache add \
   nginx \
+  libpq \
   uwsgi \
   python3 \
   py3-pip \
