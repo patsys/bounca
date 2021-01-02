@@ -25,7 +25,7 @@ services:
     links:
     - bounca
     environment:
-      - HOST=http://bounca
+      - HOST=http://bounca/admin/login
       - WORD=logged
       - INTERVAL=10
       - TRY=70
