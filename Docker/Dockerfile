@@ -1,9 +1,4 @@
 FROM alpine:3
-MAINTAINER Patrick Weber "docker@patweber.de"
-
-LABEL io.k8s.description="ApacheDS" \ 
-      io.k8s.display-name="ApacheDS"
-
 
 ENV BOUNCA_VERSION=bounca
 ENV BOUNCA_SRC=bounca
@@ -40,6 +35,12 @@ RUN cd $BOUNCA_SRVPROJ \
   && python3 /srv/www/bounca/manage.py collectstatic --noinput
 
 FROM alpine:3  
+
+MAINTAINER Patrick Weber "docker@patweber.de"
+
+LABEL io.k8s.description="BounCa" \ 
+      io.k8s.display-name="BounCa"
+
 ENV BOUNCA_SRC=bounca \
     PRE_START_PATH=/app/prestart \
     DB_USER=postgres \
@@ -49,6 +50,7 @@ ENV BOUNCA_SRC=bounca \
     SMTP_HOST=localhost \
     ADMIN_MAIL=admin@localhost \
     FROM_MAIL=no-reply@localhost
+
 RUN apk --no-cache add \
   nginx \
   libpq \
